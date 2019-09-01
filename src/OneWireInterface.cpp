@@ -95,6 +95,11 @@ void OneWireInterface::sendPacket(const OneWirePacket &aPacket)
     mStream.flush();
 #ifdef TEENSYDUINO
     mStream.clear();
+#else
+    while (mStream.available())
+    {
+        mStream.read();
+    }
 #endif
     readMode();
 }

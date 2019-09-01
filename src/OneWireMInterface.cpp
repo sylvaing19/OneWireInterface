@@ -29,11 +29,15 @@ OneWireStatus OneWireMInterface::receivePacket(OneWirePacket &aPacket, uint8_t a
 		return OW_STATUS_COM_ERROR;
 	}
 	aPacket.mLength = buffer[1];
+    if (aPacket.mLength < 2)
+    {
+        return OW_STATUS_COM_ERROR;
+    }
+	aPacket.mStatus = buffer[2];
 	if (aPacket.mLength > 2 && aPacket.mLength - 2 != answerSize)
 	{
 		return OW_STATUS_COM_ERROR;
 	}
-	aPacket.mStatus = buffer[2];
 	if (aPacket.mLength > 2 && (int)mStream.readBytes(reinterpret_cast<char*>(aPacket.mData), aPacket.mLength - 2) < (aPacket.mLength - 2))
 	{
 		return OW_STATUS_TIMEOUT;
@@ -46,6 +50,10 @@ OneWireStatus OneWireMInterface::receivePacket(OneWirePacket &aPacket, uint8_t a
 	{
         return OW_STATUS_CHECKSUM_ERROR;
 	}
+    if (aPacket.mLength == 2 && answerSize != 0)
+    {
+        return OW_STATUS_DATA_MISSING;
+    }
     return OW_STATUS_OK;
 }
 

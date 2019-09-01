@@ -15,7 +15,8 @@ typedef uint8_t OneWireStatus;
 enum OWStatus
 {
     OW_STATUS_OK = 0, // communication was successful
-    OW_STATUS_TIMEOUT = 1, // no or not enougth data received
+    OW_STATUS_TIMEOUT = 1, // no or not enougth bytes received
+    OW_STATUS_DATA_MISSING = 2, // valid packet received but without the requested data
     OW_STATUS_CHECKSUM_ERROR = 16, // packet received with invalid checksum
     OW_STATUS_COM_ERROR = 128 // other communication error
 };
