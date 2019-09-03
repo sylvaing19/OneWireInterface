@@ -74,10 +74,8 @@ public:
     void setReceptionTimeout(uint32_t timeout) { mReceptionTimeout = timeout; }
     uint32_t getReceptionTimeout() const { return mReceptionTimeout; }
 
-    /**
-     * \brief Status containing errors not related with the communication
-    */
-    uint8_t mHardwareStatus;
+    bool waitingToSendPacket() const { return mPacketToSend; }
+    void setHardwareStatus(uint8_t hardwareStatus) { mHardwareStatus = hardwareStatus; }
 
 private:
     void sendPacketIfReady();
@@ -88,6 +86,7 @@ private:
     bool mPacketToSend; // If true, the mPacket is ready to be sent
     uint32_t mInstructionTimestamp; // Timestamp of the last received instruction
     uint8_t mRBuffer[OW_S_RBUFFER_SIZE];
+    uint8_t mHardwareStatus; // Status containing errors not related with the communication
 
     uint8_t mID; // Slave ID
     uint32_t mRDT; // Return Delay Time (µs)
