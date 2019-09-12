@@ -3,6 +3,9 @@ from PyQt5.QtGui import QIcon
 import sys, glob
 from img.load_img import img
 from widget_serial_port import WidgetSerialPort
+from widget_device import WidgetDevice
+
+from widget_register_entry import WidgetRegisterEntry
 
 
 class OneWireGui:
@@ -18,17 +21,24 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         # Members
-        self.baudrate = 400000
 
         # Widgets
         self.w_serial_port = WidgetSerialPort(self, self.openConnection,
                                               self.closeConnection,
                                               self.enableGUI,
                                               self.listSerialPorts)
+        self.w_device = WidgetDevice(self, self.ping, self.soft_reset,
+                                     self.factory_reset)
+
+        self.test = WidgetRegisterEntry(self, 42, 0, 120, "test", self.read, """je suis une patate douce""", self.write)
 
         # Layout
         grid = QGridLayout()
         grid.addWidget(self.w_serial_port, 0, 0)
+        grid.addWidget(self.w_device, 1, 0)
+        grid.addWidget(self.test, 0, 1)
+        grid.setColumnStretch(1, 1)
+        grid.setRowStretch(2, 1)
         self.setLayout(grid)
 
         self.setWindowTitle('One-wire device controller')
@@ -46,11 +56,26 @@ class MainWindow(QWidget):
         pass
 
     def set_baudrate(self, baudrate):
-        self.baudrate = baudrate
+        pass
         #todo update baudrate (open close stream)
 
     def enableGUI(self, e):
         pass
+
+    def ping(self):
+        pass
+
+    def soft_reset(self):
+        pass
+
+    def factory_reset(self):
+        pass
+
+    def read(self, _):
+        return 42
+
+    def write(self, _, __):
+        return True
 
     def listSerialPorts(self):
         """ Lists serial port names

@@ -37,9 +37,11 @@ class WidgetSerialPort(QWidget):
         grid.addWidget(title, 0, 0, 1, 2)
         grid.addWidget(self.combo_box, 1, 0)
         grid.addWidget(self.b_connect, 1, 1)
+        grid.setColumnStretch(0, 1)
         frame.setLayout(grid)
         m_grid = QGridLayout()
         m_grid.addWidget(frame)
+        m_grid.setContentsMargins(0, 0, 0, 0)
         self.setLayout(m_grid)
 
         # Init
@@ -69,6 +71,7 @@ class WidgetSerialPort(QWidget):
             self.connected = True
         else:
             self.display_failure()
+            self.scan_ports()
 
     def scan_ports(self):
         for i in range(self.combo_box.count()):
