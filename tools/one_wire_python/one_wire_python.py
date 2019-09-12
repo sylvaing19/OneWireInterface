@@ -6,12 +6,15 @@ from one_wire_packet import OneWirePacket
 
 ONE_WIRE_BROADCAST_ID = 0xFD
 
-
-class OneWireTimeout(Exception):
+class OneWireException(Exception):
     pass
-class OneWireChecksumError(Exception):
+class OneWireTimeout(OneWireException):
     pass
-class OneWireComError(Exception):
+class OneWireDataMissing(OneWireException):
+    pass
+class OneWireChecksumError(OneWireException):
+    pass
+class OneWireComError(OneWireException):
     pass
 
 
@@ -98,6 +101,8 @@ class OneWireMasterInterface:
         p.address = addr
         p.data.append(struct.calcsize(data_format))
         err, data = self._transaction(p, True)
+        if len(data) == 0:
+            raise OneWireDataMissing
         try:
             val, = struct.unpack(data_format, data)
         except struct.error:
