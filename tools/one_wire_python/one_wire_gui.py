@@ -2,10 +2,12 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QApplication)
 from PyQt5.QtGui import QIcon
 import sys, glob
 from img.load_img import img
+from one_wire_python import (OneWireMasterInterface, OneWireException,
+                             OneWireDataMissing, OneWireComError,
+                             OneWireChecksumError, OneWireTimeout)
 from widget_serial_port import WidgetSerialPort
 from widget_device import WidgetDevice
-
-from widget_register_entry import WidgetRegisterEntry
+from widget_register_display import WidgetRegisterDisplay
 
 
 class OneWireGui:
@@ -21,61 +23,165 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         # Members
+        self.ow_interface = OneWireMasterInterface()
 
         # Widgets
+        self.w_device = WidgetDevice(self, self.ping, self.soft_reset,
+                                     self.factory_reset, self.set_baudrate)
+        self.w_register_display = WidgetRegisterDisplay(self, self.read, self.write)
         self.w_serial_port = WidgetSerialPort(self, self.openConnection,
                                               self.closeConnection,
                                               self.enableGUI,
                                               self.listSerialPorts)
-        self.w_device = WidgetDevice(self, self.ping, self.soft_reset,
-                                     self.factory_reset)
-
-        self.test = WidgetRegisterEntry(self, 42, 0, 120, "test", self.read, """je suis une patate douce""", self.write)
 
         # Layout
         grid = QGridLayout()
         grid.addWidget(self.w_serial_port, 0, 0)
         grid.addWidget(self.w_device, 1, 0)
-        grid.addWidget(self.test, 0, 1)
-        grid.setColumnStretch(1, 1)
+        grid.addWidget(self.w_register_display, 0, 1, 3, 1)
+        grid.setColumnStretch(2, 1)
         grid.setRowStretch(2, 1)
         self.setLayout(grid)
 
         self.setWindowTitle('One-wire device controller')
         self.setWindowIcon(QIcon(img('intech.ico')))
-        # self.resize(100, 100)
         self.show()
 
     def openConnection(self, port):
-        # self.com.connect(port, self.baudrate)
-        # return True on connection success, False otherwise
-        return False
+        try:
+            self.ow_interface.open(port, self.w_device.get_baudrate())
+            return True
+        except IOError:
+            return False
 
     def closeConnection(self):
-        # self.com.disconnect()
-        pass
+        self.ow_interface.close()
+
+    def connectionLost(self):
+        self.w_serial_port.connection_lost()
 
     def set_baudrate(self, baudrate):
-        pass
-        #todo update baudrate (open close stream)
+        try:
+            self.ow_interface.setBaudrate(baudrate)
+        except IOError:
+            self.connectionLost()
 
     def enableGUI(self, e):
-        pass
+        self.w_device.setEnabled(e)
+        self.w_register_display.setEnabled(e)
 
     def ping(self):
-        pass
+        try:
+            self.w_device.set_ow_status(0)
+            d_id = self.w_device.get_id()
+            err = self.ow_interface.ping(d_id)
+            try:
+                err, srl = self.ow_interface.readU8(d_id, 6)
+            except OneWireTimeout:
+                srl = 0
+            else:
+                try:
+                    err, model = self.ow_interface.readU16(d_id, 0)
+                    self.w_device.set_model_nb(model)
+                    err, firmware = self.ow_interface.readU8(d_id, 2)
+                    self.w_device.set_firmware_version(firmware)
+                except OneWireException:
+                    pass
+            self.w_device.set_return_level(srl)
+            self.w_device.set_device_status(err)
+        except IOError:
+            self.connectionLost()
+        except OneWireException as e:
+            self.handle_ow_error(e)
 
     def soft_reset(self):
-        pass
+        try:
+            err = self.ow_interface.softReset(self.w_device.get_id(),
+                                        self.w_device.get_return_level() > 1)
+            if err is not None:
+                self.w_device.set_device_status(err)
+            self.w_device.set_ow_status(0)
+        except IOError:
+            self.connectionLost()
+        except OneWireException as e:
+            self.handle_ow_error(e)
 
     def factory_reset(self):
-        pass
+        try:
+            err = self.ow_interface.factoryReset(self.w_device.get_id(),
+                                           self.w_device.get_return_level() > 1)
+            if err is not None:
+                self.w_device.set_device_status(err)
+            self.w_device.set_ow_status(0)
+        except IOError:
+            self.connectionLost()
+        except OneWireException as e:
+            self.handle_ow_error(e)
 
-    def read(self, _):
-        return 42
+    def read(self, address, size):
+        if self.w_device.get_return_level() == 0:
+            raise OneWireDataMissing
+        try:
+            d_id = self.w_device.get_id()
+            if size == 1:
+                err, val = self.ow_interface.readU8(d_id, address)
+            elif size == 2:
+                err, val = self.ow_interface.readU16(d_id, address)
+            elif size == 4:
+                err, val = self.ow_interface.readU32(d_id, address)
+            else:
+                raise RuntimeError("Read function not implemented for size=" +
+                                   str(size))
+        except IOError:
+            self.w_device.set_ow_status(0)
+            self.connectionLost()
+            raise OneWireDataMissing
+        except OneWireException as e:
+            self.handle_ow_error(e)
+            raise OneWireDataMissing
+        self.w_device.set_device_status(err)
+        self.w_device.set_ow_status(0)
+        return val
 
-    def write(self, _, __):
+    def write(self, address, size, value):
+        try:
+            d_id = self.w_device.get_id()
+            e_answer = self.w_device.get_return_level() > 1
+            if size == 1:
+                err = self.ow_interface.writeU8(d_id, address, value, e_answer)
+            elif size == 2:
+                err = self.ow_interface.writeU16(d_id, address, value, e_answer)
+            elif size == 4:
+                err = self.ow_interface.writeU32(d_id, address, value, e_answer)
+            else:
+                raise RuntimeError("Write function not implemented for size=" +
+                                   str(size))
+        except IOError:
+            self.w_device.set_ow_status(0)
+            self.connectionLost()
+            return False
+        except OneWireException as e:
+            self.handle_ow_error(e)
+            return False
+        self.w_device.set_ow_status(0)
+        if err is not None:
+            self.w_device.set_device_status(err)
+            if err & 88:
+                return False
         return True
+
+    def handle_ow_error(self, e):
+        if isinstance(e, OneWireTimeout):
+            s = 1
+        elif isinstance(e, OneWireDataMissing):
+            s = 2
+        elif isinstance(e, OneWireChecksumError):
+            s = 16
+        elif isinstance(e, OneWireComError):
+            s = 128
+        else:
+            s = 255
+        self.w_device.set_ow_status(s)
 
     def listSerialPorts(self):
         """ Lists serial port names

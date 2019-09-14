@@ -30,7 +30,7 @@ class OneWireMasterInterface:
         "SYNC_WRITE": 131,
     }
 
-    def __init__(self, port, baudrate=400000, timeout=0.1):
+    def __init__(self, port="", baudrate=400000, timeout=0.1):
         self.serial = serial.Serial()
         self.serial.port = port
         self.serial.baudrate = baudrate
@@ -48,6 +48,17 @@ class OneWireMasterInterface:
 
     def close(self):
         self.serial.close()
+
+    def isOpen(self):
+        return self.serial.isOpen()
+
+    def setBaudrate(self, baudrate):
+        if self.isOpen():
+            self.serial.close()
+            self.serial.baudrate = baudrate
+            self.serial.open()
+        else:
+            self.serial.baudrate = baudrate
 
     def readU8(self, device_id: int, addr: int) -> Tuple[int, int]:
         return self._read(device_id, addr, "<B")

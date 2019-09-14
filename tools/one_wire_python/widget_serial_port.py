@@ -46,6 +46,7 @@ class WidgetSerialPort(QWidget):
 
         # Init
         self.scan_ports()
+        self.cb_enable_gui(False)
 
     def connection_lost(self):
         if self.connected:
