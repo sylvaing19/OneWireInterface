@@ -3083,6 +3083,7 @@ design rules under a new name.</description>
 <element name="JP1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="1X06/90" package3d_urn="urn:adsk.eagle:package:22475/2" value="FTDI" x="64" y="16" smashed="yes" rot="R270">
 <attribute name="NAME" x="60.19" y="24.255" size="1.27" layer="25" ratio="10"/>
 <attribute name="POPULARITY" value="10" x="64" y="16" size="1.778" layer="27" rot="R270" display="off"/>
+<attribute name="REF_MANF" value="TTL-234X-3V3" x="64" y="16" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="VALUE" x="60.19" y="6.475" size="1.27" layer="27"/>
 </element>
 <element name="U1" library="SparkFun-PowerIC" package="SOT223" value="" x="22" y="29" smashed="yes" rot="R90">

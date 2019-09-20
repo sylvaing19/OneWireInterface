@@ -14352,7 +14352,9 @@ Source: www.kingbright.com</description>
 </part>
 <part name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="R0805" package3d_urn="urn:adsk.eagle:package:23553/2" value="10k"/>
 <part name="J1" library="con-jack" library_urn="urn:adsk.eagle:library:154" deviceset="DCJ0202" device="" package3d_urn="urn:adsk.eagle:package:7491/1"/>
-<part name="JP1" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X6" device="/90" package3d_urn="urn:adsk.eagle:package:22475/2" value="FTDI"/>
+<part name="JP1" library="pinhead" library_urn="urn:adsk.eagle:library:325" deviceset="PINHD-1X6" device="/90" package3d_urn="urn:adsk.eagle:package:22475/2" value="FTDI">
+<attribute name="REF_MANF" value="TTL-234X-3V3"/>
+</part>
 <part name="U1" library="SparkFun-PowerIC" deviceset="V_REG_LM1117" device="SOT223">
 <attribute name="PARTNO" value="*"/>
 <attribute name="REF-RS" value="828-7609"/>
@@ -14466,6 +14468,7 @@ Source: www.kingbright.com</description>
 <instance part="JP1" gate="A" x="50.8" y="106.68" smashed="yes">
 <attribute name="NAME" x="44.45" y="117.475" size="1.778" layer="95"/>
 <attribute name="VALUE" x="44.45" y="96.52" size="1.778" layer="96"/>
+<attribute name="REF_MANF" x="50.8" y="106.68" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="U1" gate="G$1" x="38.1" y="86.36" smashed="yes">
 <attribute name="REF-RS" x="38.1" y="86.36" size="1.778" layer="96" display="off"/>
