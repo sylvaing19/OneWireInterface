@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import (QWidget, QPushButton, QLabel, QHBoxLayout,
 from functools import partial
 from input_field import InputField
 from one_wire_python import OneWireDataMissing
-from reg_map.reg_map import register_map_structure_check
 
 
 class WidgetRegisterEntry(QWidget):
@@ -127,28 +126,30 @@ class WidgetRegisterEntryList(QWidget):
         self.eeprom_size = 0
 
     def init(self, register_map):
-        register_map_structure_check(register_map)
         self.entries = []
         self.addresses = []
         self.sizes = []
-        self.eeprom_size = len(register_map[0])
+        self.eeprom_size = len(register_map[1])
         for i in reversed(range(self.grid.count())):
-            w = self.grid.itemAt(i).widget()
+            item = self.grid.itemAt(i)
+            w = item.widget()
             if w is not None:
                 w.deleteLater()
-        if len(register_map[0]) > 0:
+            else:
+                self.grid.removeItem(item)
+        if len(register_map[1]) > 0:
             label_eeprom = QLabel("EEPROM Area", self)
             label_eeprom.setAlignment(Qt.AlignCenter)
             label_eeprom.setStyleSheet("QLabel { font: bold; }")
             self.grid.addWidget(label_eeprom)
-            for e in register_map[0]:
+            for e in register_map[1]:
                 self._add_reg_entry(e)
-        if len(register_map[1]) > 0:
+        if len(register_map[2]) > 0:
             label_ram = QLabel("RAM Area", self)
             label_ram.setAlignment(Qt.AlignCenter)
             label_ram.setStyleSheet("QLabel { font: bold; }")
             self.grid.addWidget(label_ram)
-            for e in register_map[1]:
+            for e in register_map[2]:
                 self._add_reg_entry(e)
         self.grid.addStretch(1)
 
