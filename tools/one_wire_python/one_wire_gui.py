@@ -68,7 +68,7 @@ class MainWindow(QWidget):
 
     def enableGUI(self, e):
         self.w_device.setEnabled(e)
-        self.w_register_display.setEnabled(e)
+        self.w_register_display.set_enabled(e)
 
     def ping(self):
         try:

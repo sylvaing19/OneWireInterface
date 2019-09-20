@@ -1,14 +1,5 @@
-"""
-Structure typing:
-OneWireRegisterMap: ([OneWireRegisterEntry, ...], [OneWireRegisterEntry, ...])
-OneWireRegisterEntry: (int, int, str, bool, int, int, str)
-
-Structure meaning:
-OneWireRegisterMap: ([EEPROM_register, ...], [RAM_register, ...])
-OneWireRegisterEntry: (address, size, name, writable, min, max, docstring)
-"""
-
 OneWireRegisterMap = (
+    "ToF Module",
 [  # EEPROM Area
     (0, 2, "Model number", False, 0, 65535, ""),
     (2, 1, "Firmware version", False, 0, 255, ""),
