@@ -50,7 +50,8 @@ public:
     * \param[in] aDirectionPin : direction pin, use NO_DIR_PORT if you do not one (default)
     */
     OneWireSInterface(HardwareSerial &aStream, uint8_t aInstructionErrorCode,
-        uint8_t aChecksumErrorCode, uint8_t aDirectionPin = NO_DIR_PORT);
+        uint8_t aChecksumErrorCode, uint8_t aDirectionPin = NO_DIR_PORT,
+        Stream* aDebugStream = nullptr);
 
     /**
      * \brief Non-blocking method to communicates with the master (send/receive). Should be called as often as possible.

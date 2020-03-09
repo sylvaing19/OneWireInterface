@@ -113,7 +113,7 @@ protected:
     * \param[in] aStream : hardare serial used by the interface
     * \param[in] aDirectionPin : direction pin, use NO_DIR_PORT if you do not one (default)
     */
-    OneWireInterface(HardwareSerial &aStream, uint8_t aDirectionPin = NO_DIR_PORT);
+    OneWireInterface(HardwareSerial &aStream, uint8_t aDirectionPin = NO_DIR_PORT, Stream *aDebugStream = nullptr);
 
     /**
     * \brief Send a packet on bus
@@ -142,6 +142,7 @@ public:
 protected:
     HardwareSerial &mStream;
     const uint8_t mDirectionPin;
+    Stream* mDebugStream;
 
 };
 

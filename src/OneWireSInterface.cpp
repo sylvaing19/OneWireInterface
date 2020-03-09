@@ -2,8 +2,8 @@
 
 OneWireSInterface::OneWireSInterface(HardwareSerial &aStream,
     uint8_t aInstructionErrorCode, uint8_t aChecksumErrorCode,
-    uint8_t aDirectionPin) :
-        OneWireInterface(aStream, aDirectionPin),
+    uint8_t aDirectionPin, Stream* aDebugStream) :
+        OneWireInterface(aStream, aDirectionPin, aDebugStream),
         mInstructionErrorCode(aInstructionErrorCode),
         mChecksumErrorCode(aChecksumErrorCode)
 {
@@ -50,31 +50,50 @@ bool OneWireSInterface::handleNewByte(uint8_t b)
     static size_t rLength = 0;
     static size_t rBufferIndex = 0;
     int ret = false;
+
     uint32_t now = millis();
 
     if (rBufferIndex > 0 && now - lastCallTime > mReceptionTimeout) {
         rBufferIndex = 0;
+        if (mDebugStream) {
+            mDebugStream->println("OneWireSInterface: Reception timeout");
+        }
     }
     lastCallTime = now;
     if (rBufferIndex == OW_S_RBUFFER_SIZE) {
         rBufferIndex = 0;
         ret = true;
+        if (mDebugStream) {
+            mDebugStream->println("OneWireSInterface: rBuffer full");
+        }
     }
     if (rBufferIndex < 2) {
         if (b != 0xFF) {
             rBufferIndex = 0;
+            if (mDebugStream) {
+                mDebugStream->print("OneWireSInterface: Bad header: ");
+                mDebugStream->println(b);
+            }
             return ret;
         }
     }
     else if (rBufferIndex == 2) {
         if (b == 0xFF) {
             rBufferIndex = 0;
+            if (mDebugStream) {
+                mDebugStream->print("OneWireSInterface: Bad ID: ");
+                mDebugStream->println(b);
+            }
             return ret;
         }
     }
     else if (rBufferIndex == 3) {
         if (b < 2) {
             rBufferIndex = 0;
+            if (mDebugStream) {
+                mDebugStream->print("OneWireSInterface: Bad length: ");
+                mDebugStream->println(b);
+            }
             return ret;
         }
         rLength = (size_t)b + 4;
@@ -211,4 +230,3 @@ void OneWireSInterface::handleNewPacket()
         mPacket = OneWirePacket(id, mChecksumErrorCode | mHardwareStatus);
     }
 }
-

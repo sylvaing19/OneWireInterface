@@ -27,8 +27,8 @@ uint8_t OneWirePacket::checkSum()
 }
 
 
-OneWireInterface::OneWireInterface(HardwareSerial &aStream, uint8_t aDirectionPin) :
-    mStream(aStream), mDirectionPin(aDirectionPin)
+OneWireInterface::OneWireInterface(HardwareSerial &aStream, uint8_t aDirectionPin, Stream* aDebugStream) :
+    mStream(aStream), mDirectionPin(aDirectionPin), mDebugStream(aDebugStream)
 {
     if (mDirectionPin != NO_DIR_PORT)
     {
@@ -47,11 +47,20 @@ void OneWireInterface::begin(unsigned long aBaud, unsigned long timeout)
     }
     mStream.setTimeout(timeout); //warning : response delay seems much higher than expected for some operation (eg writing eeprom)
     readMode();
+
+    if (mDebugStream) {
+        mDebugStream->print("OneWireInterface::begin ");
+        mDebugStream->println(aBaud);
+    }
 }
 
 void OneWireInterface::end()
 {
     mStream.end();
+
+    if (mDebugStream) {
+        mDebugStream->println("OneWireInterface::end");
+    }
 }
 
 void OneWireInterface::sendPacket(const OneWirePacket &aPacket)
